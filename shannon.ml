@@ -75,7 +75,10 @@ let shannon_of_filestream (fname:string) :(int * int * float) =
       close_in  in_ch;
       calculate_entropy fhash;
     with e -> raise e 
-                      
+
+
+let get_help_text =
+  "Calculate Shannon Entropy (in bits): Usage and Options: \n\n  call with string input or:\n"
 
 
 (* display ops *)
@@ -91,10 +94,6 @@ let show_results ((slen:int), (asize:int), (result:float)) :unit =
 
 (* modes of operation *)
 type run_mode = FileStream of string | StringStream 
-
-
-let get_help_text =
-  "Calculate Shannon Entropy (in bits): Usage and Options: \n\n  call with string input or:\n"
 
 
 (* use a local run mode ref, written only by the (one-time) command line parser.
