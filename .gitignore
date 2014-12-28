@@ -1,0 +1,12 @@
+.nrepl-port
+*.sh
+.lein-deps-sum
+.lein-failures
+.lein-plugins
+.lein-env
+.lein-repl-history
+*.swp
+*.dump
+*.o
+*.cmx
+*.out
