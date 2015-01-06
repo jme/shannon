@@ -9,42 +9,43 @@ It's written in stock OCaml and uses a mutable Hashtbl for binning.
  
 
 ## howto
-Run from command line, passing in a string or, with the -f flag, a filename.
-Returns the basic Shannon Entropy in bits.
+Run from command line, passing in a string or, with the -f flag, a filename.  
+-h or --help for help.  
+Returns the basic Shannon Entropy in bits.  
 
 Uses Streams and is fairly fast; file IO will probably account for most of the run time.
 
 
 ###a few examples
 
-Shannon Entropy of the string "1223334444" (also contained in the demo.txt file)
-character count: 10
-alphabet size: 4
-value: 1.84643934467
+Shannon Entropy of the string "1223334444" (also contained in the demo.txt file)  
+character count: 10  
+alphabet size: 4  
+value: 1.84643934467  
 
 
-the text of "The Time Machine", by H.G. Welles
-character count: 178937
-alphabet size: 70
-value: 4.42227483271
+the text of "The Time Machine", by H.G. Welles  
+character count: 178937  
+alphabet size: 70  
+value: 4.42227483271  
 
 
-"Alice in Wonderland", by Lewis Carroll
-character count: 163783
-alphabet size: 87
-value: 4.5903438441
+"Alice in Wonderland", by Lewis Carroll  
+character count: 163783  
+alphabet size: 87  
+value: 4.5903438441  
 
 
-genome text of the Enterobacteria phage phiX174
-character count: 5386
-alphabet size: 4
-value: 1.9845793595
+genome text of the Enterobacteria phage phiX174  
+character count: 5386  
+alphabet size: 4  
+value: 1.9845793595  
 
 
-executable binary file of the shannon program itself (linux x64)
-character count: 439109
-alphabet size: 255
-value: 5.47700872144
+executable binary file of the shannon program itself (linux x64)  
+character count: 439109  
+alphabet size: 255  
+value: 5.47700872144  
 
 
 ## brief dev notes
