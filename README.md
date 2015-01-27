@@ -25,27 +25,18 @@ value: 1.84643934467
 
 
 the text of "The Time Machine", by H.G. Welles  
-character count: 178937  
-alphabet size: 70  
-value: 4.42227483271  
+character count: 182153  
+value: 4.4722636685
 
 
 "Alice in Wonderland", by Lewis Carroll  
-character count: 163783  
-alphabet size: 87  
-value: 4.5903438441  
+character count: 167518  
+value: 4.64214241863  
 
 
-genome text of the Enterobacteria phage phiX174  
-character count: 5386  
-alphabet size: 4  
-value: 1.9845793595  
-
-
-executable binary file of the shannon program itself (linux x64)  
-character count: 439109  
-alphabet size: 255  
-value: 5.47700872144  
+executable binary file of the shannon program itself (linux x86_64)  
+character count: 440231  
+value: 5.48398710282  
 
 
 ## brief dev notes
