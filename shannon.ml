@@ -4,7 +4,6 @@
 *)
 
 
-
 (* IO: all display ops are contained here *)
 let show_results ((slen:int), (asize:int), (result:float)) :unit =
 
@@ -14,21 +13,19 @@ let show_results ((slen:int), (asize:int), (result:float)) :unit =
 
 
 
-(* for string inputs: 
-   pre-bake and return an inner-loop function to do the binning 
+(* pre-bake and return an inner-loop function to do the binning 
    and assembly of a character frequency map 
  
    uses a Hashtbl for the bins 
 *)
-let get_string_processor (m: (char, int) Hashtbl.t) :(char -> unit)  =
+let get_hashtbl_processor (m: (char,int) Hashtbl.t ) :(char -> unit)  =
   (fun (c:char) -> try
                Hashtbl.replace m c ( (Hashtbl.find m c) + 1) 
              with Not_found -> Hashtbl.add m c 1)
 
 
 
-(* for file inputs: 
-   pre-bake and return an inner-loop function to do the binning 
+(* pre-bake and return an inner-loop function to do the binning 
    and assembly of a character frequency map 
  
    uses a mutable array for the bins 
@@ -48,19 +45,20 @@ let get_calc (slen:int) :(float -> float) =
 
 
 
-(* Hashtbl version: Given a character frequency map, calculate the Shannon Entropy *)
-let calculate_entropy_hashtbl (freq_hash: ('a, int) Hashtbl.t) :(int * int * float) =
+(*  Hashtbl version:
+    Given a character frequency map, calculate the Shannon Entropy *)
+let calculate_entropy_hashtbl (freq_hash:  (char,int) Hashtbl.t) :(int * int * float) =
 
-  let relative_probs = Hashtbl.fold (fun k v b -> (float v)::b) freq_hash [] in
-  let slen = List.fold_left (fun b x -> b + (int_of_float x)) 0 relative_probs in
+  let slen = Hashtbl.fold (fun k v b -> b + v) freq_hash 0 in
   let calc = get_calc  slen in
-  let result = -1.0 *. List.fold_left (fun b x -> b +. calc x) 0.0 relative_probs in
+  let result = -1.0 *. Hashtbl.fold (fun k v b -> b +. calc(float v)) freq_hash 0.0 in
 
-  (slen, (List.length relative_probs), result)
+  (slen, (Hashtbl.length freq_hash), result)
 
 
 
-(* Array version: Given a character frequency map, calculate the Shannon Entropy *)
+(* Array version: 
+   Given a character frequency map, calculate the Shannon Entropy *)
 let calculate_entropy_array (freq_array: int array) :(int * int * float) =
 
   let slen = Array.fold_left (fun b x -> b + x ) 0 freq_array in
@@ -74,44 +72,60 @@ let calculate_entropy_array (freq_array: int array) :(int * int * float) =
 
 
 (* handle the case of string input *)
-let shannon_of_string (s:string) : ('a, int) Hashtbl.t   = 
+let shannon_of_string (s:string) : (char, int) Hashtbl.t   = 
 
   let fhash = Hashtbl.create 256 in
-  Stream.iter (get_string_processor fhash) (Stream.of_string s);
+  Stream.iter (get_hashtbl_processor fhash) (Stream.of_string s);
   fhash
 
 
 
-
 (* handle file input via char reads.  includes newline chars.  *)
-let shannon_of_filestream (fname:string)  : int array =
+ let process_file fname (calc_fn: (char -> unit)) :unit =
 
-  let farray = Array.make 256 0 in 
+  let process_bytes in_chan = 
+    let bufsize = 2000 in    (* gratuitous magic number *)
+    let buf = String.make bufsize '0' in
 
-  (* yeah, that buffer size is just a gratuitous magic number *)
-  let bufsize = 2000 in
-
-  let buf = String.make bufsize '0' in
-  let running = ref true in 
+    let rec nloop n  = 
+        let n = (input in_chan buf 0 bufsize) in
+        if  n > 0 then ( String.iter  calc_fn (String.sub buf 0 n);
+                         nloop n )
+    in
+    nloop 0;
+  in
 
   let in_chan = open_in fname in
     try
+      process_bytes in_chan; 
+      close_in in_chan; 
 
-      while !running do
-        let n = (input in_chan buf 0 bufsize) in
-          if n > 0 then
-            String.iter (get_array_processor farray) (String.sub buf 0 n)
-          else running := false
-      done;
+    with e -> close_in in_chan; 
+;;
 
-    close_in in_chan; 
-    farray;
 
-    with e -> begin
-               close_in in_chan; 
-               farray
-              end
 
+(* using two explicit wrappers functions for clarity.
+ * Array and Hashtbl are mutable, and so the 'processor' style... *)
+
+(* for hashtbl usage *)
+let shannon_of_filestream_hm (fname:string)  : (char,int) Hashtbl.t =
+
+  let fhash = Hashtbl.create 256 in 
+
+    process_file fname  (get_hashtbl_processor fhash);
+
+    fhash
+
+
+(* for array usage *)
+let shannon_of_filestream_array (fname:string)  : int array  =
+
+  let farray = Array.make 256 0 in 
+
+    process_file fname  (get_array_processor farray);
+
+    farray
 
 
 
@@ -132,7 +146,7 @@ let () =
   match !run_env with
     FileStream(fname) -> show_results( 
                               calculate_entropy_array( 
-                                shannon_of_filestream fname))
+                                shannon_of_filestream_array fname))
 
   | StringStream -> if (Array.length Sys.argv == 2)
                     then show_results(
